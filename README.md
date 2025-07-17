@@ -1,4 +1,4 @@
 # Bikash krishna Panga
 
 
-![Project Screenshot](./image/preview.png)
+![Project Screenshot](./src/image/preview.png)

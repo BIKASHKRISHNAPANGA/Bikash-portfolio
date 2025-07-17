@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-
+import Bikash from "@/image/bikash-photo.jpg"
 interface HistoryEntry {
   command: string;
   output: string;
@@ -471,7 +471,7 @@ Type 'about' to learn more about me.
                   {/* Your image will go here */}
                   <div>
                     <img
-                      src="/src/image/bikash photo.jpg"
+                      src={Bikash}
                       alt="Bikash krishna Panga "
                       className="w-full h-full rounded-full bg-slate-700 flex items-center justify-center text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-600"
                     />
