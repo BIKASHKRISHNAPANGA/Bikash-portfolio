@@ -362,7 +362,7 @@ Type 'about' to learn more about me.
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex">
+    <div className="min-h-screen bg-slate-900 flex flex-col md:flex-row">
       <style
         dangerouslySetInnerHTML={{
           __html: `
@@ -454,7 +454,7 @@ Type 'about' to learn more about me.
       />
 
       {/* Left Section - Professional Profile */}
-      <div className="w-2/5 relative overflow-hidden bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800">
+      <div className="w-full md:w-2/5 relative overflow-hidden bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800">
         {/* Background Effects */}
         <div className="absolute inset-0 overflow-hidden">
           <FloatingOrbs />
@@ -462,11 +462,11 @@ Type 'about' to learn more about me.
         </div>
 
         {/* Main Content */}
-        <div className="relative z-10 h-full flex flex-col justify-center items-center p-8">
+        <div className="relative z-10 h-full flex flex-col justify-center items-center p-4 sm:p-6 md:p-8">
           {/* Profile Image Container */}
           <div className="slide-in mb-8">
             <div className="relative">
-              <div className="w-48 h-48 rounded-full glass-effect p-1 pulse-animation">
+              <div className="w-32 h-32 md:w-48 md:h-48 rounded-full glass-effect p-1 pulse-animation">
                 <div className="w-full h-full rounded-full bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 flex items-center justify-center text-white text-4xl font-bold shadow-2xl">
                   {/* Your image will go here */}
                   <div>
@@ -525,7 +525,7 @@ Type 'about' to learn more about me.
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-4 mt-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 mt-6">
               <div className="glass-effect rounded-lg p-3 text-center">
                 <div className="text-2xl font-bold text-sky-400">7.9</div>
                 <div className="text-xs text-gray-400">GPA</div>
@@ -543,7 +543,7 @@ Type 'about' to learn more about me.
       </div>
 
       {/* Right Section - Terminal */}
-      <div className="w-3/5 bg-gray-900 flex flex-col">
+      <div className="w-full md:w-3/5 bg-gray-900 flex flex-col">
         {/* Terminal Header */}
         <div className="bg-gray-800 px-4 py-3 border-b border-gray-700 flex items-center justify-between">
           <div className="flex space-x-2">
@@ -560,7 +560,7 @@ Type 'about' to learn more about me.
         {/* Terminal Content */}
         <div
           ref={terminalRef}
-          className="flex-1 p-4 text-lime-400 font-mono text-sm overflow-y-auto terminal-scrollbar"
+          className="flex-1 px-3 py-2 sm:px-4 sm:py-4 text-lime-400 font-mono text-sm overflow-y-auto terminal-scrollbar"
           style={{ maxHeight: "calc(100vh - 60px)" }}
         >
           {history.map((entry, index) => (
