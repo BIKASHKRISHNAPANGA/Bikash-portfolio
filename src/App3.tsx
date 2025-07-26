@@ -400,38 +400,72 @@ const NeofetchPortfolio: React.FC = () => {
           <div className="text-cyan-400 font-bold text-xl mb-4">
             📫 Let's Connect!
           </div>
-          <div className="bg-gray-800/50 border border-gray-600 rounded p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <span className="text-yellow-400">📧</span>
+
+          <div className="bg-gray-800/50 border border-gray-600 rounded-lg p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Left column - Email & Phone */}
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-yellow-400 text-xl">📧</span>
                   <div>
                     <div className="text-gray-400 text-sm">Email</div>
-                    <div className="text-green-400">
+                    <a
+                      href="mailto:pangsbikashkrishna@gmail.com"
+                      className="text-green-400 hover:underline break-all"
+                    >
                       pangsbikashkrishna@gmail.com
-                    </div>
+                    </a>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <span className="text-yellow-400">📱</span>
+
+                <div className="flex items-start gap-3">
+                  <span className="text-yellow-400 text-xl">📱</span>
                   <div>
                     <div className="text-gray-400 text-sm">Phone</div>
-                    <div className="text-green-400">+91 9348258150</div>
+                    <a
+                      href="tel:+919348258150"
+                      className="text-green-400 hover:underline"
+                    >
+                      +91 9348258150
+                    </a>
                   </div>
                 </div>
               </div>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <span className="text-yellow-400">💼</span>
+
+              {/* Right column - LinkedIn, GitHub, Location */}
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-yellow-400 text-xl">💼</span>
                   <div>
                     <div className="text-gray-400 text-sm">LinkedIn</div>
-                    <div className="text-blue-400 hover:underline cursor-pointer">
+                    <a
+                      href="https://www.linkedin.com/in/bikash-krishna-panga-254612232/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:underline break-all"
+                    >
                       linkedin.com/in/bikash-krishna-panga
-                    </div>
+                    </a>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <span className="text-yellow-400">📍</span>
+
+                <div className="flex items-start gap-3">
+                  <span className="text-yellow-400 text-xl">👨🏻‍💻</span>
+                  <div>
+                    <div className="text-gray-400 text-sm">GitHub</div>
+                    <a
+                      href="https://github.com/BIKASHKRISHNAPANGA"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:underline break-all"
+                    >
+                      github.com/BIKASHKRISHNAPANGA
+                    </a>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <span className="text-yellow-400 text-xl">📍</span>
                   <div>
                     <div className="text-gray-400 text-sm">Location</div>
                     <div className="text-green-400">
@@ -442,8 +476,9 @@ const NeofetchPortfolio: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="mt-4 text-center">
-            <div className="text-gray-300 mb-2">
+
+          <div className="mt-6 text-center">
+            <div className="text-gray-300 text-base mb-2">
               Ready to collaborate on exciting projects! 🚀
             </div>
             <div className="text-gray-400 text-sm">
@@ -499,87 +534,91 @@ README.md    portfolio.json    resume.pdf    .gitignore    package.json`,
     },
   };
 
-  const NeofetchDisplay: React.FC = () => {
-    const asciiArt = (
-      <img
-        src={Bikash}
-        alt="Bikash krishna Panga "
-        className="w-full h-full rounded-full bg-slate-700 flex items-center justify-center text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-600"
-      />
-    );
+const NeofetchDisplay: React.FC = () => {
+  const asciiArt = (
+    <img
+      src={Bikash}
+      alt="Bikash Krishna Panga"
+      className="w-24 h-24 sm:w-32 sm:h-32 md:w-48 md:h-48 rounded-full bg-slate-700 mx-auto md:mx-0 shadow-md"
+    />
+  );
 
-    const systemInfo = [
-      { label: "", value: "bikash@portfolio" },
-      { label: "", value: "-------------------" },
-      { label: "OS", value: "Developer Portfolio LTS 22.04" },
-      { label: "Host", value: "Full-Stack Developer Workstation" },
-      { label: "Kernel", value: "React-Next.js-6.0.0-enhanced" },
-      { label: "Uptime", value: "Available for opportunities 24/7" },
-      { label: "Packages", value: "60+ (npm), 25+ (core skills)" },
-      { label: "Shell", value: "TypeScript 5.2.21 /w ESLint" },
-      { label: "Resolution", value: "Fully Responsive Design" },
-      { label: "DE", value: "VS Code Pro 46.0" },
-      { label: "WM", value: "Git Workflow Manager" },
-      { label: "WM Theme", value: "Clean Code Architecture" },
-      { label: "Theme", value: "Modern UI/UX Experience" },
-      { label: "Icons", value: "Lucide React + Custom" },
-      { label: "Terminal", value: "Enhanced Interactive Terminal" },
-      { label: "CPU", value: "Problem Solving @ 3.8GHz Logic" },
-      { label: "GPU", value: "Creative Design Thinking RTX" },
-      { label: "Memory", value: "7.9 GPA + Continuous Learning Buffer" },
-    ];
+  const systemInfo = [
+    { label: "", value: "bikash@portfolio" },
+    { label: "", value: "-------------------" },
+    { label: "OS", value: "Developer Portfolio LTS 22.04" },
+    { label: "Host", value: "Full-Stack Developer Workstation" },
+    { label: "Kernel", value: "React-Next.js-6.0.0-enhanced" },
+    { label: "Uptime", value: "Available for opportunities 24/7" },
+    { label: "Packages", value: "60+ (npm), 25+ (core skills)" },
+    { label: "Shell", value: "TypeScript 5.2.21 /w ESLint" },
+    { label: "Resolution", value: "Fully Responsive Design" },
+    { label: "DE", value: "VS Code Pro 46.0" },
+    { label: "WM", value: "Git Workflow Manager" },
+    { label: "WM Theme", value: "Clean Code Architecture" },
+    { label: "Theme", value: "Modern UI/UX Experience" },
+    { label: "Icons", value: "Lucide React + Custom" },
+    { label: "Terminal", value: "Enhanced Interactive Terminal" },
+    { label: "CPU", value: "Problem Solving @ 3.8GHz Logic" },
+    { label: "GPU", value: "Creative Design Thinking RTX" },
+    { label: "Memory", value: "7.9 GPA + Continuous Learning Buffer" },
+  ];
 
-    const colors = [
-      "bg-gray-800",
-      "bg-red-500",
-      "bg-green-500",
-      "bg-yellow-500",
-      "bg-blue-500",
-      "bg-purple-500",
-      "bg-cyan-500",
-      "bg-white",
-    ];
+  const colors = [
+    "bg-gray-800",
+    "bg-red-500",
+    "bg-green-500",
+    "bg-yellow-500",
+    "bg-blue-500",
+    "bg-purple-500",
+    "bg-cyan-500",
+    "bg-white",
+  ];
 
-    return (
-      <div className="font-mono text-sm">
-        <div className="flex">
-          <div className="text-orange-400 mr-8 whitespace-pre leading-tight">
-            {asciiArt}
-          </div>
-          <div className="flex-1 space-y-1">
-            {systemInfo.map((info, index) => (
-              <div key={index} className="flex">
-                {info.label && (
-                  <>
-                    <span className="text-cyan-400 font-bold w-24">
-                      {info.label}
-                    </span>
-                    <span className="text-white mr-2">:</span>
-                  </>
-                )}
-                <span
-                  className={
-                    info.label
-                      ? "text-white"
-                      : index === 0
-                      ? "text-cyan-400 font-bold text-lg"
-                      : "text-cyan-400"
-                  }
-                >
-                  {info.value}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="mt-6 flex space-x-1">
-          {colors.map((color, index) => (
-            <div key={index} className={`w-6 h-4 ${color} rounded-sm`}></div>
+  return (
+    <div className="font-mono text-sm text-white max-w-screen-xl mx-auto">
+      <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6">
+        <div className="text-orange-400">{asciiArt}</div>
+        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-1 w-full">
+          {systemInfo.map((info, index) => (
+            <div key={index} className="flex">
+              {info.label && (
+                <>
+                  <span className="text-cyan-400 font-bold w-28">
+                    {info.label}
+                  </span>
+                  <span className="text-white mr-2">:</span>
+                </>
+              )}
+              <span
+                className={
+                  info.label
+                    ? "text-white"
+                    : index === 0
+                    ? "text-cyan-400 font-bold text-lg col-span-2"
+                    : "text-cyan-400"
+                }
+              >
+                {info.value}
+              </span>
+            </div>
           ))}
         </div>
       </div>
-    );
-  };
+
+      <div className="mt-6 flex flex-wrap justify-center lg:justify-start gap-2">
+        {colors.map((color, index) => (
+          <div
+            key={index}
+            className={`w-6 h-4 ${color} rounded-sm shadow-sm`}
+          ></div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
 
   useEffect(() => {
     setHistory([
