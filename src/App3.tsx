@@ -2,6 +2,10 @@ import type React from "react";
 import { useState, useEffect, useRef } from "react";
 import Bikash from "@/image/bikash-photo.jpg";
 
+/* -------------------------------------------------------------------------- */
+/*  Types                                                                     */
+/* -------------------------------------------------------------------------- */
+
 interface HistoryEntry {
   command: string;
   output: string | React.ReactNode;
@@ -18,6 +22,291 @@ interface Commands {
   [key: string]: Command;
 }
 
+/* -------------------------------------------------------------------------- */
+/*  Profile data (single source of truth — mirrors the resume PDF)            */
+/* -------------------------------------------------------------------------- */
+
+const PROFILE = {
+  name: "Bikash Krishna Panga",
+  role: "Web Developer (Full-Stack)",
+  email: "developerbikash16@gmail.com",
+  phone: "+91 9348258150",
+  phoneHref: "tel:+919348258150",
+  website: "bikashportfolio.web.app",
+  websiteHref: "https://bikashportfolio.web.app",
+  linkedin: "linkedin.com/in/bikash-krishna-panga",
+  linkedinHref: "https://www.linkedin.com/in/bikash-krishna-panga-254612232/",
+  github: "github.com/BIKASHKRISHNAPANGA",
+  githubHref: "https://github.com/BIKASHKRISHNAPANGA",
+  location: "Gopalpur on Sea, Ganjam, Odisha",
+  // Put the PDF in your /public folder with this exact name
+  resumeHref: "/Bikash_Krishna_Panga_Resume_Revised.pdf",
+  summary:
+    "Web Developer with hands-on internship experience across React.js, Node.js, and WordPress. Built a customizable rich-text editor that cut page load time by 76%, and led a student sponsorship initiative that raised ₹4 lakh from 6 sponsors across 31 schools, engaging 3,000+ students.",
+};
+
+const SKILL_GROUPS: { title: string; icon: string; items: string[] }[] = [
+  { title: "Languages", icon: "💬", items: ["JavaScript (ES6+)", "TypeScript"] },
+  {
+    title: "Frontend",
+    icon: "🎨",
+    items: [
+      "React.js",
+      "Next.js",
+      "HTML5",
+      "CSS3",
+      "Tailwind CSS",
+      "Responsive Design",
+    ],
+  },
+  { title: "Mobile", icon: "📱", items: ["React Native"] },
+  {
+    title: "Backend",
+    icon: "⚙️",
+    items: ["Node.js", "Express.js", "REST API Development"],
+  },
+  {
+    title: "Libraries",
+    icon: "📚",
+    items: ["Tiptap.js", "Redux / Context API", "Axios"],
+  },
+  {
+    title: "Database / CMS",
+    icon: "🗄️",
+    items: ["MongoDB", "Firebase", "WordPress"],
+  },
+  {
+    title: "Tools & Platforms",
+    icon: "🛠️",
+    items: ["Git", "GitHub", "Vercel", "Netlify", "Postman"],
+  },
+  {
+    title: "Core Concepts",
+    icon: "🧠",
+    items: [
+      "Data Structures & Algorithms",
+      "Performance Optimization",
+      "SEO Optimization",
+      "Cross-Browser Compatibility",
+      "Agile Development",
+    ],
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/*  Small presentational components (defined OUTSIDE the main component so    */
+/*  they are not re-created on every render)                                  */
+/* -------------------------------------------------------------------------- */
+
+const Panel: React.FC<{ children: React.ReactNode; className?: string }> = ({
+  children,
+  className = "",
+}) => (
+  <div
+    className={`bg-gray-800/50 border border-gray-600 rounded p-4 ${className}`}
+  >
+    {children}
+  </div>
+);
+
+const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="text-cyan-400 font-bold text-xl mb-4">{children}</div>
+);
+
+const Chip: React.FC<{ children: React.ReactNode; tone?: string }> = ({
+  children,
+  tone = "bg-blue-500/20 text-blue-400",
+}) => (
+  <span className={`px-2 py-1 rounded text-sm ${tone}`}>{children}</span>
+);
+
+const ProjectCard: React.FC<{
+  title: string;
+  tech: string;
+  period: string;
+  link?: string;
+  points: string[];
+  status?: string;
+}> = ({ title, tech, period, link, points, status }) => (
+  <div className="border border-gray-600 rounded p-4 bg-gray-800/50">
+    <div className="flex flex-wrap justify-between items-start gap-2 mb-1">
+      <h3 className="text-cyan-400 font-bold">{title}</h3>
+      {status && (
+        <span className="text-green-400 text-xs px-2 py-1 bg-green-400/20 rounded">
+          {status}
+        </span>
+      )}
+    </div>
+    <div className="text-gray-400 text-xs mb-2">{period}</div>
+    <div className="text-yellow-400 text-sm mb-2">{tech}</div>
+    <ul className="space-y-1 text-sm text-gray-300 list-disc list-inside">
+      {points.map((p) => (
+        <li key={p}>{p}</li>
+      ))}
+    </ul>
+    {link && (
+      <a
+        href={`https://${link}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-block mt-3 text-blue-400 hover:underline text-sm break-all"
+      >
+        🔗 {link}
+      </a>
+    )}
+  </div>
+);
+
+const ExperienceCard: React.FC<{
+  role: string;
+  company: string;
+  place: string;
+  period: string;
+  current?: boolean;
+  points: string[];
+}> = ({ role, company, place, period, current, points }) => (
+  <Panel>
+    <div className="flex flex-wrap justify-between items-start gap-2 mb-3">
+      <div>
+        <div className="text-green-400 font-bold text-lg">{role}</div>
+        <div className="text-yellow-400">
+          {company} <span className="text-gray-400">• {place}</span>
+        </div>
+      </div>
+      <div className="text-right">
+        <div className="text-gray-400 text-sm">{period}</div>
+        {current && (
+          <span className="text-green-400 text-xs px-2 py-1 bg-green-400/20 rounded">
+            Current
+          </span>
+        )}
+      </div>
+    </div>
+    <ul className="space-y-2 text-sm text-gray-300 list-disc list-inside">
+      {points.map((p) => (
+        <li key={p}>{p}</li>
+      ))}
+    </ul>
+  </Panel>
+);
+
+const ContactRow: React.FC<{
+  icon: string;
+  label: string;
+  value: string;
+  href?: string;
+  external?: boolean;
+  tone?: string;
+}> = ({ icon, label, value, href, external, tone = "text-green-400" }) => (
+  <div className="flex items-start gap-3">
+    <span className="text-yellow-400 text-xl">{icon}</span>
+    <div className="min-w-0">
+      <div className="text-gray-400 text-sm">{label}</div>
+      {href ? (
+        <a
+          href={href}
+          {...(external
+            ? { target: "_blank", rel: "noopener noreferrer" }
+            : {})}
+          className={`${tone} hover:underline break-all`}
+        >
+          {value}
+        </a>
+      ) : (
+        <div className={tone}>{value}</div>
+      )}
+    </div>
+  </div>
+);
+
+const NeofetchDisplay: React.FC = () => {
+  const photo = (
+    <img
+      src={Bikash}
+      alt={PROFILE.name}
+      className="w-24 h-24 sm:w-32 sm:h-32 md:w-48 md:h-48 rounded-full bg-slate-700 object-cover mx-auto md:mx-0 shadow-md"
+    />
+  );
+
+  const systemInfo = [
+    { label: "", value: "bikash@portfolio" },
+    { label: "", value: "-------------------" },
+    { label: "OS", value: "Developer Portfolio LTS 26.04" },
+    { label: "Host", value: PROFILE.role },
+    { label: "Role", value: "Web Development Intern @ Addensure Media" },
+    { label: "Kernel", value: "React-Next.js-Node-6.0.0" },
+    { label: "Uptime", value: "Building since 2022 (B.Tech CSE)" },
+    { label: "Packages", value: "React, Next.js, Express, Tiptap, Redux" },
+    { label: "Shell", value: "TypeScript /w Tailwind CSS" },
+    { label: "CMS", value: "WordPress themes & plugins" },
+    { label: "Mobile", value: "React Native" },
+    { label: "DB", value: "MongoDB • Firebase" },
+    { label: "Deploy", value: "Vercel • Netlify" },
+    { label: "Impact", value: "76% faster page load (Tiptap editor)" },
+    { label: "Events", value: "₹4 lakh raised • 31 schools • 3,000+ students" },
+    { label: "Rank", value: "Top 5% of batch" },
+    { label: "Award", value: "Runner-up, Ganjam Coding Competition" },
+    { label: "Web", value: PROFILE.website },
+  ];
+
+  const colors = [
+    "bg-gray-800",
+    "bg-red-500",
+    "bg-green-500",
+    "bg-yellow-500",
+    "bg-blue-500",
+    "bg-purple-500",
+    "bg-cyan-500",
+    "bg-white",
+  ];
+
+  return (
+    <div className="font-mono text-sm text-white max-w-screen-xl mx-auto">
+      <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6">
+        <div className="text-orange-400">{photo}</div>
+        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-1 w-full">
+          {systemInfo.map((info, index) => (
+            <div key={index} className="flex">
+              {info.label && (
+                <>
+                  <span className="text-cyan-400 font-bold w-24 shrink-0">
+                    {info.label}
+                  </span>
+                  <span className="text-white mr-2">:</span>
+                </>
+              )}
+              <span
+                className={
+                  info.label
+                    ? "text-white break-words min-w-0"
+                    : index === 0
+                    ? "text-cyan-400 font-bold text-lg col-span-2"
+                    : "text-cyan-400"
+                }
+              >
+                {info.value}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-6 flex flex-wrap justify-center lg:justify-start gap-2">
+        {colors.map((color, index) => (
+          <div
+            key={index}
+            className={`w-6 h-4 ${color} rounded-sm shadow-sm`}
+          ></div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/* -------------------------------------------------------------------------- */
+/*  Main component                                                            */
+/* -------------------------------------------------------------------------- */
+
 const NeofetchPortfolio: React.FC = () => {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [currentInput, setCurrentInput] = useState<string>("");
@@ -31,49 +320,9 @@ const NeofetchPortfolio: React.FC = () => {
 
   // Update time every second
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-
-  const ProjectCard: React.FC<{
-    title: string;
-    tech: string;
-    description: string;
-    status?: string;
-  }> = ({ title, tech, description, status }) => (
-    <div className="border border-gray-600 rounded p-3 mb-2 bg-gray-800/50">
-      <div className="flex justify-between items-start mb-2">
-        <h3 className="text-cyan-400 font-bold">{title}</h3>
-        {status && (
-          <span className="text-green-400 text-xs px-2 py-1 bg-green-400/20 rounded">
-            {status}
-          </span>
-        )}
-      </div>
-      <div className="text-yellow-400 text-sm mb-1">{tech}</div>
-      <div className="text-gray-300 text-sm">{description}</div>
-    </div>
-  );
-
-  const SkillBar: React.FC<{ skill: string; level: number }> = ({
-    skill,
-    level,
-  }) => (
-    <div className="mb-2">
-      <div className="flex justify-between text-sm mb-1">
-        <span className="text-cyan-400">{skill}</span>
-        <span className="text-gray-400">{level}%</span>
-      </div>
-      <div className="w-full bg-gray-700 rounded-full h-2">
-        <div
-          className="bg-gradient-to-r from-green-400 to-cyan-400 h-2 rounded-full transition-all duration-1000 ease-out"
-          style={{ width: `${level}%` }}
-        ></div>
-      </div>
-    </div>
-  );
 
   const commands: Commands = {
     help: {
@@ -114,6 +363,9 @@ const NeofetchPortfolio: React.FC = () => {
                   <span className="text-green-400">pwd</span> - Print working
                   directory
                 </div>
+                <div>
+                  <span className="text-green-400">ls</span> - List sections
+                </div>
               </div>
             </div>
             <div>
@@ -125,8 +377,8 @@ const NeofetchPortfolio: React.FC = () => {
                   <span className="text-green-400">about</span> - Learn about me
                 </div>
                 <div>
-                  <span className="text-green-400">skills</span> - View
-                  technical skills
+                  <span className="text-green-400">skills</span> - Technical
+                  skills
                 </div>
                 <div>
                   <span className="text-green-400">experience</span> - Work
@@ -135,6 +387,14 @@ const NeofetchPortfolio: React.FC = () => {
                 <div>
                   <span className="text-green-400">projects</span> - Browse
                   projects
+                </div>
+                <div>
+                  <span className="text-green-400">education</span> - Education
+                  details
+                </div>
+                <div>
+                  <span className="text-green-400">achievements</span> -
+                  Certifications & awards
                 </div>
                 <div>
                   <span className="text-green-400">contact</span> - Contact
@@ -164,38 +424,31 @@ const NeofetchPortfolio: React.FC = () => {
       category: "portfolio",
       output: () => (
         <div>
-          <div className="text-cyan-400 font-bold text-xl mb-4">
-            🚀 About Me
-          </div>
-          <div className="bg-gray-800/50 border border-gray-600 rounded p-4 mb-4">
-            <div className="text-green-400 font-bold mb-2">
-              Result-Driven Full-Stack Developer
-            </div>
-            <div className="text-gray-300 mb-4">
-              Passionate about building scalable, AI-powered applications that
-              solve real-world problems. I thrive in fast-paced environments and
-              love turning complex challenges into elegant solutions.
-            </div>
+          <SectionTitle>🚀 About Me</SectionTitle>
+          <Panel className="mb-4">
+            <div className="text-green-400 font-bold mb-2">{PROFILE.role}</div>
+            <div className="text-gray-300 mb-4">{PROFILE.summary}</div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
                 <div className="text-yellow-400 font-bold">📍 Location</div>
-                <div className="text-gray-300">
-                  Gopalpur on Sea, Ganjam, Odisha
-                </div>
+                <div className="text-gray-300">{PROFILE.location}</div>
               </div>
               <div>
                 <div className="text-yellow-400 font-bold">🎓 Education</div>
-                <div className="text-gray-300">B.Tech - 7.9 GPA</div>
+                <div className="text-gray-300">
+                  B.Tech, Computer Science Engineering (2022 – 2026)
+                </div>
                 <div className="text-gray-400 text-xs">
-                  Gayatri Institute of Engineering
+                  Gayatri Institute of Engineering and Technology • Top 5% of
+                  batch
                 </div>
               </div>
               <div>
                 <div className="text-yellow-400 font-bold">
-                  💼 Current Focus
+                  💼 Current Role
                 </div>
                 <div className="text-gray-300">
-                  BABY.AI - Relationship Wellness Bot
+                  Web Development Intern @ Addensure Media LLP
                 </div>
               </div>
               <div>
@@ -205,6 +458,26 @@ const NeofetchPortfolio: React.FC = () => {
                 </div>
               </div>
             </div>
+          </Panel>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 text-center">
+            <Panel>
+              <div className="text-green-400 text-2xl font-bold">76%</div>
+              <div className="text-gray-400 text-xs">
+                page load time reduction
+              </div>
+            </Panel>
+            <Panel>
+              <div className="text-green-400 text-2xl font-bold">₹4 lakh</div>
+              <div className="text-gray-400 text-xs">
+                raised from 6 sponsors
+              </div>
+            </Panel>
+            <Panel>
+              <div className="text-green-400 text-2xl font-bold">3,000+</div>
+              <div className="text-gray-400 text-xs">
+                students across 31 schools
+              </div>
+            </Panel>
           </div>
           <div className="text-gray-400 text-sm">
             💡 Type <span className="text-green-400">'skills'</span> to see my
@@ -218,58 +491,33 @@ const NeofetchPortfolio: React.FC = () => {
       category: "portfolio",
       output: () => (
         <div>
-          <div className="text-cyan-400 font-bold text-xl mb-4">
-            ⚡ Technical Skills
+          <SectionTitle>⚡ Technical Skills</SectionTitle>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {SKILL_GROUPS.map((group) => (
+              <Panel key={group.title}>
+                <div className="text-yellow-400 font-bold mb-3">
+                  {group.icon} {group.title}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {group.items.map((item) => (
+                    <Chip key={item}>{item}</Chip>
+                  ))}
+                </div>
+              </Panel>
+            ))}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-gray-800/50 border border-gray-600 rounded p-4">
-              <div className="text-yellow-400 font-bold mb-3">
-                🎨 Frontend Development
-              </div>
-              <SkillBar skill="React.js / Next.js" level={90} />
-              <SkillBar skill="TypeScript" level={85} />
-              <SkillBar skill="Tailwind CSS" level={88} />
-              <SkillBar skill="UI/UX Design" level={80} />
+          <Panel className="mt-4">
+            <div className="text-yellow-400 font-bold mb-2">
+              🤖 AI-Assisted Development
             </div>
-            <div className="bg-gray-800/50 border border-gray-600 rounded p-4">
-              <div className="text-yellow-400 font-bold mb-3">
-                ⚙️ Backend Development
-              </div>
-              <SkillBar skill="Node.js / Express" level={82} />
-              <SkillBar skill="API Development" level={85} />
-              <SkillBar skill="Database Design" level={78} />
-              <SkillBar skill="Appwrite (BaaS)" level={80} />
+            <div className="text-gray-300 text-sm">
+              Prompt engineering with Claude, ChatGPT, and GitHub Copilot for
+              code generation and debugging.
             </div>
-          </div>
-          <div className="mt-4 bg-gray-800/50 border border-gray-600 rounded p-4">
-            <div className="text-yellow-400 font-bold mb-3">
-              🛠️ Tools & Technologies
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {[
-                "Git",
-                "GitHub",
-                "VS Code",
-                "Docker",
-                "AWS",
-                "Vercel",
-                "MongoDB",
-                "PostgreSQL",
-                "Redis",
-                "Socket.io",
-              ].map((tool) => (
-                <span
-                  key={tool}
-                  className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-sm"
-                >
-                  {tool}
-                </span>
-              ))}
-            </div>
-          </div>
+          </Panel>
           <div className="mt-4 text-gray-400 text-sm">
-            🏆 <strong>Certifications:</strong> Full Stack Developer (Appwrite),
-            Complete Web Development Bootcamp
+            🏆 Type <span className="text-green-400">'achievements'</span> for
+            certifications and awards
           </div>
         </div>
       ),
@@ -279,69 +527,36 @@ const NeofetchPortfolio: React.FC = () => {
       category: "portfolio",
       output: () => (
         <div>
-          <div className="text-cyan-400 font-bold text-xl mb-4">
-            💼 Work Experience
+          <SectionTitle>💼 Work Experience</SectionTitle>
+          <div className="space-y-4">
+            <ExperienceCard
+              role="Web Development Intern"
+              company="Addensure Media LLP"
+              place="Delhi, India"
+              period="March 2026 – Present"
+              current
+              points={[
+                "Designing and implementing modern UI components using React.js for seamless user interaction",
+                "Developing and maintaining multiple responsive WordPress websites, improving user experience and site performance",
+                "Building and customizing themes and plugins to meet client requirements",
+                "Leveraging React Native to develop and optimize mobile application features",
+              ]}
+            />
+            <ExperienceCard
+              role="Software Developer Intern"
+              company="MentorsLand"
+              place="Assam, India"
+              period="Mar 5, 2025 – Sep 3, 2025"
+              points={[
+                "Engineered a customizable rich-text editor using Tiptap.js, enhancing content management capabilities",
+                "Optimized frontend performance, achieving a 76% reduction in page load time",
+                "Designed and implemented an interactive dashboard with efficient state management and REST API integration",
+              ]}
+            />
           </div>
-
-          <div className="bg-gray-800/50 border border-gray-600 rounded p-4 mb-4">
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <div className="text-green-400 font-bold text-lg">
-                  Software Developer Intern
-                </div>
-                <div className="text-yellow-400">MentorsLand</div>
-              </div>
-              <div className="text-gray-400 text-sm">6 Months</div>
-            </div>
-            <div className="space-y-2 text-sm text-gray-300">
-              <div>
-                🏗️ Contributed to core features in production-grade full-stack
-                applications
-              </div>
-              <div>
-                🤖 Built 'NineBug' - AI-powered coding interview preparation
-                platform
-              </div>
-              <div>
-                ⚡ Achieved 80% faster data response across modules through
-                optimization
-              </div>
-              <div>
-                🎯 Solved complex data handling and authentication challenges
-              </div>
-              <div>
-                👥 Collaborated in agile environment with focus on clean code
-                practices
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gray-800/50 border border-gray-600 rounded p-4">
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <div className="text-green-400 font-bold text-lg">
-                  Personal Project
-                </div>
-                <div className="text-yellow-400">
-                  BABY.AI - Relationship Wellness Bot
-                </div>
-              </div>
-              <div className="text-green-400 text-sm px-2 py-1 bg-green-400/20 rounded">
-                In Progress
-              </div>
-            </div>
-            <div className="space-y-2 text-sm text-gray-300">
-              <div>
-                💝 Self-initiated WhatsApp bot for relationship wellness
-              </div>
-              <div>
-                🔮 Integrates menstrual cycle data with astrology (VedAstro API)
-              </div>
-              <div>
-                🤖 Uses AI to craft personalized daily wellness messages
-              </div>
-              <div>🔒 Privacy-first design with real-time messaging logic</div>
-            </div>
+          <div className="mt-4 text-gray-400 text-sm">
+            💡 Type <span className="text-green-400">'projects'</span> to see
+            what I've built
           </div>
         </div>
       ),
@@ -351,43 +566,118 @@ const NeofetchPortfolio: React.FC = () => {
       category: "portfolio",
       output: () => (
         <div>
-          <div className="text-cyan-400 font-bold text-xl mb-4">
-            🚀 Featured Projects
-          </div>
+          <SectionTitle>🚀 Featured Projects</SectionTitle>
           <div className="space-y-4">
             <ProjectCard
-              title="Blog App with Rich Editor"
-              tech="Next.js • TypeScript • Tiptap • Tailwind"
-              description="Full-featured blogging platform with custom rich text editor, tag system, and publishing workflows"
-              status="Completed"
-            />
-            <ProjectCard
-              title="YourLogo React Demo"
-              tech="React • TypeScript • React Router"
-              description="Comprehensive React application showcasing routing, nested layouts, and dynamic page generation"
+              title="Bikash Agro Export"
+              tech="JavaScript • Intersection Observer API • Responsive Design"
+              period="December 2025 – January 2026 • Personal Project"
+              link="bikashpanga-agroexports.netlify.app"
               status="Live"
+              points={[
+                "Fully responsive agricultural export website with dynamic scroll animations",
+                "Conversion-focused, mobile-first interface with smooth scrolling navigation",
+                "Direct communication features (click-to-call, email, WhatsApp) for lead generation",
+                "Optimized DOM handling for faster load times",
+              ]}
             />
             <ProjectCard
-              title="Responsive Portfolio Website"
-              tech="HTML5 • CSS3 • JavaScript"
-              description="Fully responsive personal portfolio with modern design and smooth animations"
+              title="IOSF — Inter-School Event Platform"
+              tech="HTML • CSS • JavaScript • React • Tailwind CSS • REST APIs"
+              period="September 5, 2025 – December 2, 2025"
+              link="interschoolosf.in"
               status="Live"
-            />
-            <ProjectCard
-              title="Performance-Optimized Todo App"
-              tech="React • Tailwind CSS • Local Storage"
-              description="Minimal task manager focusing on performance optimization and clean user experience"
-              status="Completed"
-            />
-            <ProjectCard
-              title="Course Marketplace UI"
-              tech="React • CSS Modules • Responsive Design"
-              description="Clean, modern interface for digital course marketplace with intuitive navigation"
-              status="Completed"
+              points={[
+                "Built and maintained the website with REST APIs for dynamic content rendering",
+                "Coordinated event operations engaging 31 schools and 3,000+ student participants",
+                "Secured 6 sponsors, raising ₹4 lakh in event funding",
+                "Improved performance and usability to support peak registration traffic",
+              ]}
             />
           </div>
           <div className="mt-4 text-gray-400 text-sm">
-            🔗 Visit my GitHub for complete source code and live demos
+            🔗 Visit my GitHub for more source code:{" "}
+            <a
+              href={PROFILE.githubHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:underline"
+            >
+              {PROFILE.github}
+            </a>
+          </div>
+        </div>
+      ),
+    },
+    education: {
+      description: "View my education",
+      category: "portfolio",
+      output: () => (
+        <div>
+          <SectionTitle>🎓 Education</SectionTitle>
+          <div className="space-y-4">
+            <Panel>
+              <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
+                <div>
+                  <div className="text-green-400 font-bold text-lg">
+                    B.Tech, Computer Science Engineering
+                  </div>
+                  <div className="text-yellow-400">
+                    Gayatri Institute of Engineering and Technology
+                  </div>
+                </div>
+                <div className="text-gray-400 text-sm">2022 – 2026</div>
+              </div>
+              <ul className="space-y-1 text-sm text-gray-300 list-disc list-inside">
+                <li>Ranked among top 5% of batch</li>
+                <li>Relevant coursework: Web Development, AI Prompting</li>
+              </ul>
+            </Panel>
+            <Panel>
+              <div className="text-green-400 font-bold text-lg">
+                De Paul School
+              </div>
+              <div className="text-yellow-400 mb-2">Brahmapur, India</div>
+              <ul className="space-y-1 text-sm text-gray-300 list-disc list-inside">
+                <li>Class 12: 80% (2022)</li>
+                <li>Class 10: 89% (2020)</li>
+              </ul>
+            </Panel>
+          </div>
+        </div>
+      ),
+    },
+    achievements: {
+      description: "Certifications & achievements",
+      category: "portfolio",
+      output: () => (
+        <div>
+          <SectionTitle>🏆 Certifications & Achievements</SectionTitle>
+          <div className="space-y-3">
+            <Panel>
+              <div className="text-green-400 font-bold">
+                The Complete Full-Stack Web Development Bootcamp
+              </div>
+              <div className="text-gray-400 text-sm">
+                Dr. Angela Yu • January 2025
+              </div>
+            </Panel>
+            <Panel>
+              <div className="text-green-400 font-bold">
+                Runner-up, Ganjam Coding Competition
+              </div>
+              <div className="text-gray-400 text-sm">
+                Problem-Solving & Algorithms
+              </div>
+            </Panel>
+            <Panel>
+              <div className="text-green-400 font-bold">
+                Led student sponsorship initiative (IOSF)
+              </div>
+              <div className="text-gray-400 text-sm">
+                ₹4 lakh raised • 6 sponsors • 31 schools • 3,000+ students
+              </div>
+            </Panel>
           </div>
         </div>
       ),
@@ -397,86 +687,56 @@ const NeofetchPortfolio: React.FC = () => {
       category: "portfolio",
       output: () => (
         <div>
-          <div className="text-cyan-400 font-bold text-xl mb-4">
-            📫 Let's Connect!
-          </div>
-
+          <SectionTitle>📫 Let's Connect!</SectionTitle>
           <div className="bg-gray-800/50 border border-gray-600 rounded-lg p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Left column - Email & Phone */}
               <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <span className="text-yellow-400 text-xl">📧</span>
-                  <div>
-                    <div className="text-gray-400 text-sm">Email</div>
-                    <a
-                      href="mailto:pangsbikashkrishna@gmail.com"
-                      className="text-green-400 hover:underline break-all"
-                    >
-                      pangsbikashkrishna@gmail.com
-                    </a>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <span className="text-yellow-400 text-xl">📱</span>
-                  <div>
-                    <div className="text-gray-400 text-sm">Phone</div>
-                    <a
-                      href="tel:+919348258150"
-                      className="text-green-400 hover:underline"
-                    >
-                      +91 9348258150
-                    </a>
-                  </div>
-                </div>
+                <ContactRow
+                  icon="📧"
+                  label="Email"
+                  value={PROFILE.email}
+                  href={`mailto:${PROFILE.email}`}
+                />
+                <ContactRow
+                  icon="📱"
+                  label="Phone"
+                  value={PROFILE.phone}
+                  href={PROFILE.phoneHref}
+                />
+                <ContactRow
+                  icon="🌐"
+                  label="Portfolio"
+                  value={PROFILE.website}
+                  href={PROFILE.websiteHref}
+                  external
+                  tone="text-blue-400"
+                />
               </div>
-
-              {/* Right column - LinkedIn, GitHub, Location */}
               <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <span className="text-yellow-400 text-xl">💼</span>
-                  <div>
-                    <div className="text-gray-400 text-sm">LinkedIn</div>
-                    <a
-                      href="https://www.linkedin.com/in/bikash-krishna-panga-254612232/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-400 hover:underline break-all"
-                    >
-                      linkedin.com/in/bikash-krishna-panga
-                    </a>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <span className="text-yellow-400 text-xl">👨🏻‍💻</span>
-                  <div>
-                    <div className="text-gray-400 text-sm">GitHub</div>
-                    <a
-                      href="https://github.com/BIKASHKRISHNAPANGA"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-400 hover:underline break-all"
-                    >
-                      github.com/BIKASHKRISHNAPANGA
-                    </a>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <span className="text-yellow-400 text-xl">📍</span>
-                  <div>
-                    <div className="text-gray-400 text-sm">Location</div>
-                    <div className="text-green-400">
-                      Gopalpur on Sea, Ganjam, Odisha
-                    </div>
-                  </div>
-                </div>
+                <ContactRow
+                  icon="💼"
+                  label="LinkedIn"
+                  value={PROFILE.linkedin}
+                  href={PROFILE.linkedinHref}
+                  external
+                  tone="text-blue-400"
+                />
+                <ContactRow
+                  icon="👨🏻‍💻"
+                  label="GitHub"
+                  value={PROFILE.github}
+                  href={PROFILE.githubHref}
+                  external
+                  tone="text-blue-400"
+                />
+                <ContactRow
+                  icon="📍"
+                  label="Location"
+                  value={PROFILE.location}
+                />
               </div>
             </div>
           </div>
-
           <div className="mt-6 text-center">
             <div className="text-gray-300 text-base mb-2">
               Ready to collaborate on exciting projects! 🚀
@@ -512,20 +772,24 @@ const NeofetchPortfolio: React.FC = () => {
             📄 Resume Download
           </div>
           <div className="text-gray-300 mb-4">
-            My resume contains detailed information about my experience, skills,
-            and projects.
+            My resume covers my experience, skills, projects and education in
+            detail.
           </div>
-          <div className="bg-blue-500/20 border border-blue-500 rounded p-3 text-blue-400">
-            📥 Resume download would be available in a real implementation
-          </div>
+          <a
+            href={PROFILE.resumeHref}
+            download="Bikash_Krishna_Panga_Resume.pdf"
+            className="inline-block bg-blue-500/20 border border-blue-500 rounded px-4 py-2 text-blue-400 hover:bg-blue-500/30 transition-colors"
+          >
+            📥 Download Resume (PDF)
+          </a>
         </div>
       ),
     },
     ls: {
       description: "List available sections",
       category: "system",
-      output: `about.txt    skills.txt    experience.log    projects.md    contact.info
-README.md    portfolio.json    resume.pdf    .gitignore    package.json`,
+      output: `about.txt    skills.txt    experience.log    projects.md    education.txt
+achievements.md    contact.info    resume.pdf    README.md    package.json`,
     },
     clear: {
       description: "Clear the terminal",
@@ -534,91 +798,7 @@ README.md    portfolio.json    resume.pdf    .gitignore    package.json`,
     },
   };
 
-const NeofetchDisplay: React.FC = () => {
-  const asciiArt = (
-    <img
-      src={Bikash}
-      alt="Bikash Krishna Panga"
-      className="w-24 h-24 sm:w-32 sm:h-32 md:w-48 md:h-48 rounded-full bg-slate-700 mx-auto md:mx-0 shadow-md"
-    />
-  );
-
-  const systemInfo = [
-    { label: "", value: "bikash@portfolio" },
-    { label: "", value: "-------------------" },
-    { label: "OS", value: "Developer Portfolio LTS 22.04" },
-    { label: "Host", value: "Full-Stack Developer Workstation" },
-    { label: "Kernel", value: "React-Next.js-6.0.0-enhanced" },
-    { label: "Uptime", value: "Available for opportunities 24/7" },
-    { label: "Packages", value: "60+ (npm), 25+ (core skills)" },
-    { label: "Shell", value: "TypeScript 5.2.21 /w ESLint" },
-    { label: "Resolution", value: "Fully Responsive Design" },
-    { label: "DE", value: "VS Code Pro 46.0" },
-    { label: "WM", value: "Git Workflow Manager" },
-    { label: "WM Theme", value: "Clean Code Architecture" },
-    { label: "Theme", value: "Modern UI/UX Experience" },
-    { label: "Icons", value: "Lucide React + Custom" },
-    { label: "Terminal", value: "Enhanced Interactive Terminal" },
-    { label: "CPU", value: "Problem Solving @ 3.8GHz Logic" },
-    { label: "GPU", value: "Creative Design Thinking RTX" },
-    { label: "Memory", value: "7.9 GPA + Continuous Learning Buffer" },
-  ];
-
-  const colors = [
-    "bg-gray-800",
-    "bg-red-500",
-    "bg-green-500",
-    "bg-yellow-500",
-    "bg-blue-500",
-    "bg-purple-500",
-    "bg-cyan-500",
-    "bg-white",
-  ];
-
-  return (
-    <div className="font-mono text-sm text-white max-w-screen-xl mx-auto">
-      <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6">
-        <div className="text-orange-400">{asciiArt}</div>
-        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-1 w-full">
-          {systemInfo.map((info, index) => (
-            <div key={index} className="flex">
-              {info.label && (
-                <>
-                  <span className="text-cyan-400 font-bold w-28">
-                    {info.label}
-                  </span>
-                  <span className="text-white mr-2">:</span>
-                </>
-              )}
-              <span
-                className={
-                  info.label
-                    ? "text-white"
-                    : index === 0
-                    ? "text-cyan-400 font-bold text-lg col-span-2"
-                    : "text-cyan-400"
-                }
-              >
-                {info.value}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="mt-6 flex flex-wrap justify-center lg:justify-start gap-2">
-        {colors.map((color, index) => (
-          <div
-            key={index}
-            className={`w-6 h-4 ${color} rounded-sm shadow-sm`}
-          ></div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-
+  /* ------------------------------ Effects --------------------------------- */
 
   useEffect(() => {
     setHistory([
@@ -636,9 +816,7 @@ const NeofetchDisplay: React.FC = () => {
               command-line tools.
             </div>
             <div className="bg-blue-500/20 border border-blue-500 rounded p-3 mb-4">
-              <div className="text-blue-400 font-bold mb-1">
-                🚀 Quick Start:
-              </div>
+              <div className="text-blue-400 font-bold mb-1">🚀 Quick Start:</div>
               <div className="text-sm space-y-1">
                 <div>
                   • Type{" "}
@@ -663,9 +841,7 @@ const NeofetchDisplay: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
+    inputRef.current?.focus();
   }, []);
 
   useEffect(() => {
@@ -674,15 +850,17 @@ const NeofetchDisplay: React.FC = () => {
     }
   }, [history]);
 
+  // Re-focus the input after a command finishes (the input is disabled while loading)
+  useEffect(() => {
+    if (!isLoading) inputRef.current?.focus();
+  }, [isLoading]);
+
+  /* ------------------------------ Handlers -------------------------------- */
+
   const handleCommand = async (cmd: string): Promise<void> => {
     const trimmedCmd = cmd.trim().toLowerCase();
-    let output: string | React.ReactNode = "";
+    if (trimmedCmd === "") return;
 
-    if (trimmedCmd === "") {
-      return;
-    }
-
-    // Add command to history first
     const newEntry: HistoryEntry = {
       command: cmd,
       output: "",
@@ -692,35 +870,35 @@ const NeofetchDisplay: React.FC = () => {
     if (trimmedCmd === "clear") {
       setHistory([]);
       setShowNeofetch(false);
+      setCommandHistory((prev) => [...prev, cmd]);
+      setHistoryIndex(-1);
       return;
     }
 
     setIsLoading(true);
 
-    // Simulate loading delay for better UX
+    // Small delay for a more "terminal" feel
     await new Promise((resolve) =>
       setTimeout(resolve, Math.random() * 200 + 100)
     );
 
     if (trimmedCmd === "neofetch") {
-      setShowNeofetch(true);
       newEntry.output = "neofetch";
+      setShowNeofetch(false);
     } else if (commands[trimmedCmd]) {
       const command = commands[trimmedCmd];
-      output =
+      newEntry.output =
         typeof command.output === "function"
           ? command.output()
           : command.output;
-      newEntry.output = output;
       setShowNeofetch(false);
     } else {
-      // Enhanced error message with suggestions
       const availableCommands = Object.keys(commands);
       const suggestions = availableCommands
-        .filter((cmd) => cmd.includes(trimmedCmd) || trimmedCmd.includes(cmd))
+        .filter((c) => c.includes(trimmedCmd) || trimmedCmd.includes(c))
         .slice(0, 3);
 
-      output = (
+      newEntry.output = (
         <div>
           <div className="text-red-400 mb-2">
             ❌ Command not found:{" "}
@@ -743,7 +921,6 @@ const NeofetchDisplay: React.FC = () => {
           </div>
         </div>
       );
-      newEntry.output = output;
       setShowNeofetch(false);
     }
 
@@ -781,25 +958,23 @@ const NeofetchDisplay: React.FC = () => {
       }
     } else if (e.key === "Tab") {
       e.preventDefault();
-      const availableCommands = Object.keys(commands);
-      const matches = availableCommands.filter((cmd) =>
-        cmd.startsWith(currentInput.toLowerCase())
+      if (!currentInput) return;
+      const matches = Object.keys(commands).filter((c) =>
+        c.startsWith(currentInput.toLowerCase())
       );
       if (matches.length === 1) {
         setCurrentInput(matches[0]);
       } else if (matches.length > 1) {
-        // Show multiple matches
-        const matchesOutput = (
-          <div>
-            <div className="text-yellow-400 mb-1">Multiple matches:</div>
-            <div className="text-green-400">{matches.join("  ")}</div>
-          </div>
-        );
         setHistory((prev) => [
           ...prev,
           {
             command: `${currentInput}<TAB>`,
-            output: matchesOutput,
+            output: (
+              <div>
+                <div className="text-yellow-400 mb-1">Multiple matches:</div>
+                <div className="text-green-400">{matches.join("  ")}</div>
+              </div>
+            ),
             timestamp: new Date(),
           },
         ]);
@@ -810,8 +985,13 @@ const NeofetchDisplay: React.FC = () => {
     }
   };
 
+  /* ------------------------------- Render --------------------------------- */
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-green-400">
+    <div
+      className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-green-400"
+      onClick={() => inputRef.current?.focus()}
+    >
       <style
         dangerouslySetInnerHTML={{
           __html: `
@@ -823,27 +1003,22 @@ const NeofetchDisplay: React.FC = () => {
               0%, 100% { box-shadow: 0 0 5px rgba(74, 222, 128, 0.5); }
               50% { box-shadow: 0 0 20px rgba(74, 222, 128, 0.8); }
             }
-            .typing-cursor {
-              animation: blink 1s infinite;
-            }
-            .terminal-glow {
-              animation: glow 3s ease-in-out infinite;
-            }
-            .terminal-scrollbar::-webkit-scrollbar {
-              width: 8px;
-            }
-            .terminal-scrollbar::-webkit-scrollbar-track {
-              background: #1a1a1a;
-            }
+            .typing-cursor { animation: blink 1s infinite; }
+            .terminal-glow { animation: glow 3s ease-in-out infinite; }
+            .terminal-scrollbar::-webkit-scrollbar { width: 8px; }
+            .terminal-scrollbar::-webkit-scrollbar-track { background: #1a1a1a; }
             .terminal-scrollbar::-webkit-scrollbar-thumb {
               background: linear-gradient(to bottom, #4ade80, #22d3ee);
               border-radius: 4px;
+            }
+            @media (prefers-reduced-motion: reduce) {
+              .typing-cursor, .terminal-glow { animation: none; }
             }
           `,
         }}
       />
 
-      {/* Enhanced Terminal Header */}
+      {/* Terminal header */}
       <div className="bg-gray-800/90 backdrop-blur-sm px-4 py-3 border-b border-gray-700 flex items-center justify-between shadow-lg">
         <div className="flex space-x-2">
           <div className="w-3 h-3 bg-red-500 rounded-full shadow-lg hover:bg-red-400 transition-colors cursor-pointer"></div>
@@ -856,19 +1031,18 @@ const NeofetchDisplay: React.FC = () => {
             <span className="text-yellow-400 text-xs">Processing...</span>
           )}
         </div>
-        <div className="text-gray-400 text-xs flex items-center space-x-4">
+        <div className="text-gray-400 text-xs hidden sm:flex items-center space-x-4">
           <span>🕒 {currentTime.toLocaleTimeString()}</span>
-          <span>Terminal v2.0</span>
+          <span>Terminal v2.1</span>
         </div>
       </div>
 
-      {/* Enhanced Terminal Content */}
+      {/* Terminal content */}
       <div
         ref={terminalRef}
-        className="px-6 py-6 font-mono text-sm overflow-y-auto terminal-scrollbar"
-        style={{ height: "calc(100vh - 72px)" }}
+        className="px-4 sm:px-6 py-6 font-mono text-sm overflow-y-auto terminal-scrollbar"
+        style={{ height: "calc(100vh - 100px)" }}
       >
-        {/* Command History */}
         {history.map((entry, index) => (
           <div key={index} className="mb-6">
             {entry.command && (
@@ -902,7 +1076,7 @@ const NeofetchDisplay: React.FC = () => {
           </div>
         ))}
 
-        {/* Show neofetch on initial load */}
+        {/* Neofetch on initial load */}
         {showNeofetch && history.length === 1 && (
           <div className="mb-6">
             <div className="flex items-center mb-2">
@@ -917,21 +1091,25 @@ const NeofetchDisplay: React.FC = () => {
           </div>
         )}
 
-        {/* Current Input Line */}
+        {/* Current input line */}
         <div className="flex items-center">
-          <span className="text-green-400 font-bold">bikash@portfolio:~$</span>
+          <span className="text-green-400 font-bold shrink-0">
+            bikash@portfolio:~$
+          </span>
           <input
             ref={inputRef}
             type="text"
             value={currentInput}
             onChange={(e) => setCurrentInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="bg-transparent text-white ml-2 flex-1 outline-none font-mono placeholder-gray-500"
+            className="bg-transparent text-white ml-2 flex-1 min-w-0 outline-none font-mono placeholder-gray-500"
             placeholder={
-              isLoading
-                ? "Processing..."
-                : "Type 'help' for available commands..."
+              isLoading ? "Processing..." : "Type 'help' for available commands..."
             }
+            aria-label="Terminal command input"
+            autoComplete="off"
+            autoCapitalize="off"
+            spellCheck={false}
             autoFocus
             disabled={isLoading}
           />
@@ -940,12 +1118,12 @@ const NeofetchDisplay: React.FC = () => {
 
         {/* Command suggestions */}
         {currentInput && !isLoading && (
-          <div className="mt-2 text-gray-400 text-xs">
+          <div className="mt-2 text-gray-400 text-xs flex flex-wrap gap-x-4 gap-y-1">
             {Object.keys(commands)
-              .filter((cmd) => cmd.startsWith(currentInput.toLowerCase()))
+              .filter((c) => c.startsWith(currentInput.toLowerCase()))
               .slice(0, 5)
-              .map((suggestion, index) => (
-                <span key={suggestion} className="mr-4">
+              .map((suggestion) => (
+                <span key={suggestion}>
                   <span className="text-yellow-400">{suggestion}</span>
                   <span className="text-gray-500">
                     {" "}
@@ -957,15 +1135,15 @@ const NeofetchDisplay: React.FC = () => {
         )}
       </div>
 
-      {/* Enhanced Footer with additional info */}
+      {/* Footer */}
       <div className="bg-gray-800/50 backdrop-blur-sm border-t border-gray-700 px-4 py-2 text-xs text-gray-400 flex justify-between items-center">
         <div className="flex items-center space-x-4">
-          <span>💻 Portfolio Terminal v2.0</span>
+          <span>💻 Portfolio Terminal v2.1</span>
           <span>📦 {Object.keys(commands).length} commands available</span>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="hidden sm:flex items-center space-x-4">
           <span>🔗 Interactive Experience</span>
-          <span>⚡ Enhanced & Optimized</span>
+          <span>⚡ Updated from resume</span>
         </div>
       </div>
     </div>
